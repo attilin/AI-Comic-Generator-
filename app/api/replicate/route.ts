@@ -54,4 +54,57 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const predictionId = searchParams.get('id');
+
+    if (!predictionId) {
+      return NextResponse.json(
+        { error: 'Prediction ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch(
+      `https://api.replicate.com/v1/predictions/${predictionId}`,
+      {
+        headers: {
+          Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Replicate API error: ${response.statusText}`);
+    }
+
+    const prediction = await response.json();
+
+    return NextResponse.json(prediction);
+  } catch (error: unknown) {
+    // Type guard to check if error is an Error object
+    if (error instanceof Error) {
+      console.error('Full error object:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+    
+    // Fallback for unknown error types
+    console.error('Unknown error:', error);
+    return NextResponse.json(
+      { error: 'An unknown error occurred' },
+      { status: 500 }
+    );
+  }
 } 
