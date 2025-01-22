@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 
+interface ReplicateError {
+  message: string;
+  stack?: string;
+  name?: string;
+}
+
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
@@ -85,25 +91,16 @@ export async function GET(req: Request) {
     const prediction = await response.json();
 
     return NextResponse.json(prediction);
-  } catch (error: unknown) {
-    // Type guard to check if error is an Error object
-    if (error instanceof Error) {
-      console.error('Full error object:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
+  } catch (error) {
+    const err = error as ReplicateError;
+    console.error('Full error object:', {
+      message: err.message || 'Unknown error',
+      stack: err.stack,
+      name: err.name
+    });
     
-    // Fallback for unknown error types
-    console.error('Unknown error:', error);
     return NextResponse.json(
-      { error: 'An unknown error occurred' },
+      { error: err.message || 'An unknown error occurred' },
       { status: 500 }
     );
   }
