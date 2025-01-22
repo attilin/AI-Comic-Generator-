@@ -50,7 +50,12 @@ export async function POST(req: Request) {
       ]
     });
 
-    const storyJson = JSON.parse(response.choices[0].message.content) as StoryResponse;
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content received from API');
+    }
+
+    const storyJson = JSON.parse(content) as StoryResponse;
     
     // Generate images for each panel
     const panels = await Promise.all(storyJson.comics.map(async (panel: ComicPanel) => {
