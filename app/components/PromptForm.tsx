@@ -105,14 +105,8 @@ export default function PromptForm() {
   };
 
   return (
-    <div className="space-y-8 relative">
-      {/* Animated cats */}
-      <Cat className="absolute -top-16 -left-16 animate-bounce-slow opacity-50" />
-      <Cat className="absolute -top-8 -right-16 animate-float opacity-50" />
-      <Cat className="absolute -bottom-16 -left-16 animate-wiggle opacity-50" />
-      <Cat className="absolute -bottom-8 -right-16 animate-bounce-delayed opacity-50" />
-
-      <div className="bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700 relative z-10">
+    <div className="space-y-8">
+      <div className="bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="prompt" className="block text-lg font-medium text-purple-300 mb-3">
