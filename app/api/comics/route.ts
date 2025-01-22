@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+interface ComicPanel {
+  prompt: string;
+  caption: string;
+}
+
+interface StoryResponse {
+  comics: ComicPanel[];
+}
+
 // Configure OpenAI client with custom base URL
 const client = new OpenAI({
   apiKey: process.env.GITHUB_API_KEY,
@@ -41,10 +50,10 @@ export async function POST(req: Request) {
       ]
     });
 
-    const storyJson = JSON.parse(response.choices[0].message.content);
+    const storyJson = JSON.parse(response.choices[0].message.content) as StoryResponse;
     
     // Generate images for each panel
-    const panels = await Promise.all(storyJson.comics.map(async (panel: any) => {
+    const panels = await Promise.all(storyJson.comics.map(async (panel: ComicPanel) => {
       const replicateResponse = await fetch("https://api.replicate.com/v1/predictions", {
         method: "POST",
         headers: {
@@ -71,9 +80,9 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error('Detailed error:', error);
+    console.error('Error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate comic' },
+      { error: error instanceof Error ? error.message : 'Failed to generate comic' },
       { status: 500 }
     );
   }

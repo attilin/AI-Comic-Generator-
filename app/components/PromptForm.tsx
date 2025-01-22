@@ -148,7 +148,7 @@ export default function PromptForm() {
       {panels.length > 0 && (
         <div className="bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
           <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-8">
-            Yuri's Adventure
+            Yuri&apos;s Adventure
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {panels.map((panel, index) => (
