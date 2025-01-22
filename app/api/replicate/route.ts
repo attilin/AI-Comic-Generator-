@@ -85,22 +85,18 @@ export async function GET(req: Request) {
     );
 
     if (!response.ok) {
-      throw new Error(`Replicate API error: ${response.statusText}`);
+      return NextResponse.json(
+        { error: 'Failed to fetch prediction status' },
+        { status: response.status }
+      );
     }
 
     const prediction = await response.json();
-
     return NextResponse.json(prediction);
+
   } catch (error) {
-    const err = error as ReplicateError;
-    console.error('Full error object:', {
-      message: err.message || 'Unknown error',
-      stack: err.stack,
-      name: err.name
-    });
-    
     return NextResponse.json(
-      { error: err.message || 'An unknown error occurred' },
+      { error: 'Failed to check prediction status' },
       { status: 500 }
     );
   }
