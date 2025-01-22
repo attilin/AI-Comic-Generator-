@@ -10,14 +10,19 @@ interface StoryResponse {
   comics: ComicPanel[];
 }
 
-// Configure OpenAI client with custom base URL
+// Update the client configuration to use GITHUB_API_KEY
 const client = new OpenAI({
-  apiKey: process.env.GITHUB_API_KEY,
+  apiKey: process.env.GITHUB_API_KEY || '',  // Provide empty string as fallback
   baseURL: 'https://models.inference.ai.azure.com'
 });
 
 export async function POST(req: Request) {
   try {
+    // Check if API key is available
+    if (!process.env.GITHUB_API_KEY) {
+      throw new Error('GitHub API key is not configured');
+    }
+
     const { prompt } = await req.json();
 
     // Debug log for API key (safely)
@@ -40,7 +45,6 @@ export async function POST(req: Request) {
     }
     `;
 
-    // Use the OpenAI client with custom configuration
     const response = await client.chat.completions.create({
       model: "gpt-4o",
       response_format: { type: "json_object" },
@@ -57,6 +61,11 @@ export async function POST(req: Request) {
 
     const storyJson = JSON.parse(content) as StoryResponse;
     
+    // Check if Replicate token is available
+    if (!process.env.REPLICATE_API_TOKEN) {
+      throw new Error('Replicate API token is not configured');
+    }
+
     // Generate images for each panel
     const panels = await Promise.all(storyJson.comics.map(async (panel: ComicPanel) => {
       const replicateResponse = await fetch("https://api.replicate.com/v1/predictions", {
