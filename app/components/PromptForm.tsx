@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import type { FormEvent } from 'react';
 
 interface Panel {
   prompt: string;
@@ -9,12 +10,18 @@ interface Panel {
   imageUrl?: string;
 }
 
+interface Prediction {
+  id: string;
+  status: string;
+  output?: string[];
+}
+
 export default function PromptForm() {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [panels, setPanels] = useState<Panel[]>([]);
-  const [predictions, setPredictions] = useState<any[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
 
   // Poll for all predictions
   useEffect(() => {
@@ -25,6 +32,7 @@ export default function PromptForm() {
         const updatedPredictions = await Promise.all(
           predictions.map(async (pred, index) => {
             const response = await fetch(`/api/replicate/status?id=${pred.id}`);
+            if (!response.ok) throw new Error('Failed to fetch prediction status');
             const data = await response.json();
             
             if (data.status === 'succeeded' && data.output?.[0]) {
@@ -58,8 +66,10 @@ export default function PromptForm() {
     pollPredictions();
   }, [predictions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!prompt.trim()) return;
+
     setLoading(true);
     setError('');
     setPanels([]);
@@ -74,10 +84,15 @@ export default function PromptForm() {
         body: JSON.stringify({ prompt }),
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to generate comic');
+      }
+
       const data = await response.json();
       
       if (data.error) {
         setError(data.error);
+        setLoading(false);
       } else {
         setPanels(data.story.comics);
         setPredictions(data.predictions);
@@ -90,8 +105,14 @@ export default function PromptForm() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
+    <div className="space-y-8 relative">
+      {/* Animated cats */}
+      <Cat className="absolute -top-16 -left-16 animate-bounce-slow opacity-50" />
+      <Cat className="absolute -top-8 -right-16 animate-float opacity-50" />
+      <Cat className="absolute -bottom-16 -left-16 animate-wiggle opacity-50" />
+      <Cat className="absolute -bottom-8 -right-16 animate-bounce-delayed opacity-50" />
+
+      <div className="bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700 relative z-10">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="prompt" className="block text-lg font-medium text-purple-300 mb-3">

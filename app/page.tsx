@@ -1,7 +1,14 @@
 import PromptForm from './components/PromptForm';
 import { Fredoka } from 'next/font/google';
+import type { Metadata } from 'next';
 
 const fredoka = Fredoka({ subsets: ['latin'] });
+
+// Add metadata for better SEO
+export const metadata: Metadata = {
+  title: 'AI Comic Generator - Yuri\'s Adventures',
+  description: 'Generate comic adventures featuring Yuri the cat using AI',
+};
 
 export default function Home() {
   return (
