@@ -94,7 +94,7 @@ export async function GET(req: Request) {
     const prediction = await response.json();
     return NextResponse.json(prediction);
 
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to check prediction status' },
       { status: 500 }
